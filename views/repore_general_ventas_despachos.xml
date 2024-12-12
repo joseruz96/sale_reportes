@@ -1,0 +1,47 @@
+<odoo>
+    <data>
+        <!-- Vista Form para Reporte General Venta y Despacho -->
+        <record id="view_sale_report_general_form" model="ir.ui.view">
+            <field name="name">sale.reportes.reporte_general_venta_despacho.form</field>
+            <field name="model">sale_reportes.reporte_general_venta_despacho</field>
+            <field name="arch" type="xml">
+                <form string="Reporte General Venta y Despacho">
+                    <sheet>
+                        <group>
+                            <field name="fechaInicio"/>
+                            <field name="fechaTermino"/>
+                        </group>
+                        <footer>
+                            <button name="reporte" type="object" string="Generar Reporte" class="btn-primary"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Vista Tree para mostrar los resultados del reporte -->
+        <record id="view_sale_report_general_tree" model="ir.ui.view">
+            <field name="name">sale.reportes.reporte_general_venta_despacho.tree</field>
+            <field name="model">sale_reportes.reporte_general_venta_despacho</field>
+            <field name="arch" type="xml">
+                <tree string="Reporte General Venta y Despacho">
+                    <field name="fechaInicio"/>
+                    <field name="fechaTermino"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Accion para el botón en la vista -->
+        <record id="action_report_general_venta_despacho" model="ir.actions.act_window">
+            <field name="name">Reporte General Venta y Despacho</field>
+            <field name="res_model">sale_reportes.reporte_general_venta_despacho</field>
+            <field name="view_mode">form,tree</field>  <!-- Añadido 'tree' a view_mode -->
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menú para acceder al reporte -->
+        <menuitem id="menu_report_general_venta_despacho" name="Reporte General Venta y Despacho"
+                  action="action_report_general_venta_despacho"/>
+    </data>
+</odoo>

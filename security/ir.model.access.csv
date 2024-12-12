@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_reportes_reporte_general_venta_despacho,access_sale_reportes_reporte_general_venta_despacho,sale_reportes.model_sale_reportes_reporte_general_venta_despacho,base.group_user,1,1,1,1
