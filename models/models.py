@@ -27,15 +27,7 @@ class ReporteGeneralVentaDespacho(models.Model):
     fechaTermino = fields.Datetime("Fecha Término")
 
     def reporte(self):
-        # Buscar ventas dentro del rango de fechas
-        ventas = self.env['sale.order'].search([
-            ('date_order', '>=', self.fechaInicio),
-            ('date_order', '<=', self.fechaTermino),
-            ('sale_type', '=', 'normal')
-        ])
-        
-        if not ventas:
-            raise UserError("No se encontraron ventas en el rango de fechas especificado.")
+
         
         # Crear un objeto BytesIO para guardar el archivo Excel en memoria
         output = BytesIO()
@@ -54,7 +46,7 @@ class ReporteGeneralVentaDespacho(models.Model):
 
         # Definir los encabezados del archivo Excel
         headers = [
-            'Fecha Despacho', 'N° Guía', 'Cliente', 'OC',
+            'Fecha Despacho', 'N° Guía', 'Cliente', 'Destino', 'OC',
             'Nombre Paquete', 'ID Producto', 'Nombre Producto', 
             'Cantidad Producto', 'Precio', 'Total',
             'Chofer', 'Patente Camión'
@@ -67,56 +59,61 @@ class ReporteGeneralVentaDespacho(models.Model):
         # Fila inicial para los datos
         row = 1
         
-        for venta in ventas:
-            # Buscar despachos asociados a la venta
-            despachos = self.env['stock.picking'].search([
-                ('origin', '=', venta.name),
-                ('returned', '=', False),
-                ('state', '=', 'done'),
-                ('folio_despacho', '!=', False)
-            ])
-            
-            if despachos:
-                for despacho in despachos:
-                    # Obtener los paquetes del despacho
-                    if despacho.package_level_ids_details:
-                        for row_paquete in despacho.package_level_ids_details:
-                            paquete = row_paquete.package_id
-                            if paquete:
-                                # Extraer la información requerida
-                                paquete_nombre = paquete.name or "Sin nombre"
-                                quant = paquete.quant_ids and paquete.quant_ids[0] or None
-                                if quant:
-                                    id_producto = quant.product_id.id
-                                    sku = quant.product_id.default_code
-                                    nombre_producto = quant.product_id.name
-                                    cantidad_producto = quant.quantity
-                                else:
-                                    sku = "N/A"
-                                    nombre_producto = "N/A"
-                                    cantidad_producto = 0
-                                
-                                precio = False
-                                for line in venta.order_line:
-                                    print("line.product_id.id",line.product_id.id)
-                                    print("id_producto.id",id_producto)
-                                    if line.product_id.id == id_producto:
-                                        precio = line.price_unit
-                                        print("precio",precio)
-                                        break
+         # Buscar despachos asociados a la venta
+        despachos = self.env['stock.picking'].search([
+            ('date_done', '>=', self.fechaInicio),
+            ('date_done', '<=', self.fechaTermino),
+            ('location_id.distribucion_location', '=', True),
+            ('state', '=', 'done'),
+            ('picking_type_id.code', '=', 'outgoing'),
+            ('returned', '=', False),
+            ('folio_despacho', '!=', False)
+        ])
+        
+        if despachos:
+            for despacho in despachos:
+                # Obtener los paquetes del despacho
+                venta = self.env['stock.picking'].search([
+                    ('name', '=', despacho.origin),
+                ], limit=1)
+                if despacho.package_level_ids_details:
+                    for row_paquete in despacho.package_level_ids_details:
+                        paquete = row_paquete.package_id
+                        if paquete:
+                            # Extraer la información requerida
+                            paquete_nombre = paquete.name or "Sin nombre"
+                            quant = paquete.quant_ids and paquete.quant_ids[0] or None
+                            if quant:
+                                id_producto = quant.product_id.id
+                                sku = quant.product_id.default_code
+                                nombre_producto = quant.product_id.name
+                                cantidad_producto = quant.quantity
+                            else:
+                                sku = "N/A"
+                                nombre_producto = "N/A"
+                                cantidad_producto = 0
+                            
+                            precio = False
+                            for line in venta.order_line:
+                                print("line.product_id.id",line.product_id.id)
+                                print("id_producto.id",id_producto)
+                                if line.product_id.id == id_producto:
+                                    precio = line.price_unit
+                                    print("precio",precio)
+                                    break
 
-                                chofer = despacho.chofer or "Desconocido"
-                                patente_camion = despacho.patente_camion or "Desconocida"
+                            chofer = despacho.chofer or "Desconocido"
+                            patente_camion = despacho.patente_camion or "Desconocida"
 
-                                # Escribir los datos en la hoja de Excel
-                                worksheet.write_row(row, 0, [
-                                    despacho.date_done, despacho.folio_despacho, despacho.partner_id.name,
-                                    venta.origin,
-                                    paquete_nombre, sku, nombre_producto,
-                                    cantidad_producto, precio or 0, precio * cantidad_producto,
-                                    chofer, patente_camion
-                                ])
-                                row += 1
+                            # Escribir los datos en la hoja de Excel
+                            worksheet.write_row(row, 0, [
+                                despacho.date_done, despacho.folio_despacho, despacho.partner_id.name, despacho.partner_child_id.name,
+                                venta.origin,
+                                paquete_nombre, sku, nombre_producto,
+                                cantidad_producto, precio or 0, precio * cantidad_producto,
+                                chofer, patente_camion
+                            ])
+                            row += 1
                                 
         # Ajustar el ancho de las columnas para una mejor visualización
         worksheet.set_column(0, len(headers) - 1, 15)
@@ -158,4 +155,5 @@ class DetalleGeneralVentaDespacho(models.Model):
     nombreTransportista = fields.Char()
     nombreChofer = fields.Char()
     patenteCamion = fields.Char()
+            
             
