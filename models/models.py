@@ -73,7 +73,7 @@ class ReporteGeneralVentaDespacho(models.Model):
         if despachos:
             for despacho in despachos:
                 # Obtener los paquetes del despacho
-                venta = self.env['stock.picking'].search([
+                venta = self.env['sale.order'].search([
                     ('name', '=', despacho.origin),
                 ], limit=1)
                 if despacho.package_level_ids_details:
@@ -104,17 +104,42 @@ class ReporteGeneralVentaDespacho(models.Model):
 
                             chofer = despacho.chofer or "Desconocido"
                             patente_camion = despacho.patente_camion or "Desconocida"
-
+                            origin = ''
+                            if venta:
+                                origin = venta.origin
                             # Escribir los datos en la hoja de Excel
                             worksheet.write_row(row, 0, [
                                 despacho.date_done, despacho.folio_despacho, despacho.partner_id.name, despacho.partner_child_id.name,
-                                venta.origin,
+                                origin,
                                 paquete_nombre, sku, nombre_producto,
                                 cantidad_producto, precio or 0, precio * cantidad_producto,
                                 chofer, patente_camion
                             ])
                             row += 1
-                                
+                            
+                elif despacho.move_line_ids_without_package:
+                    for row_paquete in despacho.move_line_ids_without_package:
+                        id_producto = row_paquete.product_id.id
+                        sku = row_paquete.product_id.default_code
+                        nombre_producto = row_paquete.product_id.name
+                        cantidad_producto = row_paquete.qty_done
+                        precio = row_paquete.price_unit
+                        chofer = despacho.chofer or "Desconocido"
+                        patente_camion = despacho.patente_camion or "Desconocida"
+                        origin = ''
+                        if venta:
+                            origin = venta.origin
+                        # Escribir los datos en la hoja de Excel
+                        worksheet.write_row(row, 0, [
+                            despacho.date_done, despacho.folio_despacho, despacho.partner_id.name, despacho.partner_child_id.name,
+                            origin,
+                            paquete_nombre, sku, nombre_producto,
+                            cantidad_producto, precio or 0, precio * cantidad_producto,
+                            chofer, patente_camion
+                        ])
+                        row += 1
+                        
+
         # Ajustar el ancho de las columnas para una mejor visualización
         worksheet.set_column(0, len(headers) - 1, 15)
 
