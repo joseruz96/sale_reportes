@@ -26,6 +26,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/repore_general_ventas_despachos.xml',
+        'views/reporte_tipo_producto.xml',
+        'views/reporte_despacho_subproductos.xml',
         # 'views/templates.xml',
     ],
     # only loaded in demonstration mode

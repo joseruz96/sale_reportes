@@ -1,0 +1,52 @@
+<odoo>
+    <data>
+        <!-- Vista Form para Reporte Ventas -->
+        <record id="view_sale_report_tipo_producto_form" model="ir.ui.view">
+            <field name="name">sale.reportes.tipo_producto.form</field>
+            <field name="model">sale_reportes.tipo_producto</field>
+            <field name="arch" type="xml">
+                <form string="Reporte de Ventas">
+                    <sheet>
+                        <group>
+                            <field name="start_date" />
+                            <field name="end_date" />
+                        </group>
+                        <footer>
+                            <button string="Generar Reporte" type="object" name="reporte" class="btn-primary" />
+                            <button string="Cerrar" class="btn-secondary" special="cancel" />
+                        </footer>
+                        <group attrs="{'invisible': [('excel_file', '=', False)]}">
+                            <field name="file_name" readonly="1" />
+                            <field name="excel_file" readonly="1" filename="file_name" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Vista Tree para mostrar los resultados del reporte -->
+        <record id="view_sale_report_tipo_producto_tree" model="ir.ui.view">
+            <field name="name">sale.reportes.tipo_producto.tree</field>
+            <field name="model">sale_reportes.tipo_producto</field>
+            <field name="arch" type="xml">
+                <tree string="Reporte Ventas">
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Accion para el botón en la vista -->
+        <record id="action_report_tipo_producto_venta_despacho" model="ir.actions.act_window">
+            <field name="name">Reporte Ventas</field>
+            <field name="res_model">sale_reportes.tipo_producto</field>
+            <field name="view_mode">form</field>  <!-- Añadido 'tree' a view_mode -->
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menú para acceder al reporte -->
+        <menuitem id="menu_report_tipo_producto_venta_despacho" name="Reporte Ventas"
+                  action="action_report_tipo_producto_venta_despacho"/>
+    </data>
+</odoo>

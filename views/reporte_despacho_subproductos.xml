@@ -1,0 +1,52 @@
+<odoo>
+    <data>
+        <!-- Vista Form para Reporte Despacho Subproductos -->
+        <record id="view_sale_report_despacho_subproductos_form" model="ir.ui.view">
+            <field name="name">sale.reportes.despacho_subproductos.form</field>
+            <field name="model">sale_reportes.despacho_subproductos</field>
+            <field name="arch" type="xml">
+                <form string="Reporte Despacho Subproductos">
+                    <sheet>
+                        <group>
+                            <field name="fechaInicio" />
+                            <field name="fechaTermino" />
+                        </group>
+                        <footer>
+                            <button string="Generar Reporte" type="object" name="reporte" class="btn-primary" />
+                            <button string="Cerrar" class="btn-secondary" special="cancel" />
+                        </footer>
+                        <!-- <group attrs="{'invisible': [('excel_file', '=', False)]}">
+                            <field name="file_name" readonly="1" />
+                            <field name="excel_file" readonly="1" filename="file_name" />
+                        </group> -->
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Vista Tree para mostrar los resultados del reporte -->
+        <record id="view_sale_report_despacho_subproductos_tree" model="ir.ui.view">
+            <field name="name">sale.reportes.despacho_subproductos.tree</field>
+            <field name="model">sale_reportes.despacho_subproductos</field>
+            <field name="arch" type="xml">
+                <tree string="Reporte Despacho Subproductos">
+                    <field name="fechaInicio"/>
+                    <field name="fechaTermino"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Accion para el botón en la vista -->
+        <record id="action_report_despacho_subproductos_venta_despacho" model="ir.actions.act_window">
+            <field name="name">Reporte Despacho Subproductos</field>
+            <field name="res_model">sale_reportes.despacho_subproductos</field>
+            <field name="view_mode">form</field>  <!-- Añadido 'tree' a view_mode -->
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menú para acceder al reporte -->
+        <menuitem id="menu_report_despacho_subproductos_venta_despacho" name="Reporte Despacho Subproductos"
+                  action="action_report_despacho_subproductos_venta_despacho"/>
+    </data>
+</odoo>
