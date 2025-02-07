@@ -14,7 +14,6 @@ class ReporteVentasMes(models.Model):
     fechaInicio = fields.Date('Fecha de Inicio', required=True)
     fechaTermino = fields.Date('Fecha de Término', required=True)
 
-
 class SaleReport(models.Model):
     _name = 'sale_reportes.tipo_producto'
     _description = 'Reporte de Ventas'
@@ -230,7 +229,7 @@ class ReporteDespachoSubproductos(models.Model):
 
         # Definir los encabezados del archivo Excel
         headers = [
-            'Fecha Despacho', 'N° Guía', 'Cliente', 'Destino', 'OC',
+            'Fecha Despacho', 'N° Guía', 'Cliente', 'Destino', 'OC', 'Transportista' ,'Chofer', 'Patente', 'Tarifa',
             'Nombre Producto', 'Cantidad Producto', 'Precio', 'Total',
         ]
         
@@ -260,6 +259,10 @@ class ReporteDespachoSubproductos(models.Model):
                 venta = self.env['sale.order'].search([
                     ('name', '=', despacho.origin),
                 ], limit=1)
+                linea_flete = venta.order_line.filtered(lambda l: l.product_id.saleTrozosSelection == 'transporte')[:1]
+                precio_flete = 0
+                if linea_flete:
+                    linea_flete.price_unit
                 if despacho.move_line_ids_without_package:
                     for row_paquete in despacho.move_line_ids_without_package:
                         id_producto = row_paquete.product_id.id
@@ -273,9 +276,10 @@ class ReporteDespachoSubproductos(models.Model):
                         if venta:
                             origin = venta.origin
                         # Escribir los datos en la hoja de Excel
+                        transportista = despacho.transporte_name if despacho.transporte_name else "Transportista: TRANSPORTES LORENA SOLEDAD VARGAS REYES EIRL"
                         worksheet.write_row(row, 0, [
                             despacho.date_done, despacho.folio_despacho, despacho.partner_id.name, despacho.partner_child_id.name,
-                            origin, nombre_producto,
+                            origin, transportista, chofer, patente_camion, precio_flete, nombre_producto,
                             cantidad_producto, precio or 0, precio * cantidad_producto,
                         ])
                         row += 1
@@ -306,16 +310,12 @@ class ReporteDespachoSubproductos(models.Model):
             'target': 'new',
         }
         
-
 class ReporteGeneralVentaDespacho(models.Model):
     _name = "sale_reportes.reporte_general_venta_despacho"
     
     fechaInicio = fields.Datetime("Fecha Incio")
     fechaTermino = fields.Datetime("Fecha Término")
     
-    
-
-
     def reporte(self):
 
         
